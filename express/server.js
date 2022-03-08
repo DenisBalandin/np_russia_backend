@@ -24,15 +24,86 @@ app.get("/user-list", (req, res) => {
   res.write("<h1>Hello from Express.jsffff!</h1>");
   res.end();
 });
-app.get("/example", (req, res) => {
+app.get("/news", (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) throw err;
-    connection.query("SELECT * from np_news", (err, rows) => {
-      connection.release(); // return the connection to pool
-      if (err) throw err;
-      res.send({ data: rows });
-      //  console.log("The data from users table are: \n", rows);
-    });
+    connection.query(
+      "SELECT wf02_page.id, wf02_page.slug, wf02_page.title, wf02_page.created_on, wf02_page_part.content, wf02_page_part.name from wf02_page INNER JOIN wf02_page_part ON wf02_page.id = wf02_page_part.page_id WHERE wf02_page.parent_id = 11 ",
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        let ceshMap = {};
+        let description = "";
+        let text = "";
+        const newsBlog = [];
+        for (let val of response) {
+          const { id, title, slug, name, content, created_on: createdAt } = val;
+          if (name === "body") {
+            text = content;
+          }
+          if (name === "description") {
+            description = content;
+          }
+          ceshMap[id] = { id, title, slug, text, description, createdAt };
+        }
+        for (let news in ceshMap) {
+          newsBlog.push(ceshMap[news]);
+        }
+        res.send({ data: newsBlog });
+      }
+    );
+  });
+});
+app.get("/blog", (req, res) => {
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      "SELECT wf02_page.id, wf02_page.slug, wf02_page.title, wf02_page.created_on, wf02_page_part.content, wf02_page_part.name from wf02_page INNER JOIN wf02_page_part ON wf02_page.id = wf02_page_part.page_id WHERE wf02_page.parent_id = 24 ",
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        let ceshMap = {};
+        let description = "";
+        let text = "";
+        let image = "";
+        let category = "";
+        let views = "";
+        const newsBlog = [];
+        for (let val of response) {
+          const { id, title, slug, name, content, created_on: createdAt } = val;
+          if (name === "body") {
+            text = content;
+          }
+          if (name === "description") {
+            description = content;
+          }
+          if (name === "image") {
+            image = content;
+          }
+          if (name === "category") {
+            category = content;
+          }
+          if (name === "views") {
+            views = content;
+          }
+          ceshMap[id] = {
+            id,
+            title,
+            slug,
+            text,
+            description,
+            createdAt,
+            image,
+            category,
+            views,
+          };
+        }
+        for (let news in ceshMap) {
+          newsBlog.push(ceshMap[news]);
+        }
+        res.send({ data: newsBlog });
+      }
+    );
   });
 });
 
