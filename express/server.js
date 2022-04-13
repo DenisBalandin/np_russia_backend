@@ -29,7 +29,7 @@ app.get("/news", (req, res) => {
     if (err) throw err;
     connection.query(
       // "SELECT wf02_page.id, wf02_page.slug, wf02_page.title, wf02_page.created_on, wf02_page_part.content, wf02_page_part.name from wf02_page INNER JOIN wf02_page_part ON wf02_page.id = wf02_page_part.page_id WHERE wf02_page.parent_id = 11 ",
-      "SELECT * FROM np_news",
+      "SELECT * FROM np_news ORDER BY date DESC",
       (err, response) => {
         connection.release(); // return the connection to pool
         if (err) throw err;
@@ -59,7 +59,8 @@ app.get("/news", (req, res) => {
 app.get("/blog", (req, res) => {
   pool.getConnection((err, connection) => {
     if (err) throw err;
-    connection.query('SELECT * FROM np_blog', (err, response) => {
+    connection.query(
+      'SELECT * FROM np_blog ORDER BY date DESC', (err, response) => {
       connection.release(); // return the connection to pool
       if (err) throw err;
       // let ceshMap = {};
