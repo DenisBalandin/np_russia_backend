@@ -35,15 +35,33 @@ app.get("/backend/news", (req, res) => {
     );
   });
 });
-app.get("/backend/blog", (req, res) => {
+app.get("/backend/blog/:page", (req, res) => {
+  const { page } = req.params;
+  const limit = 20;
   pool.getConnection((err, connection) => {
     if (err) throw err;
     connection.query(
-      "SELECT * FROM np_blog ORDER BY date DESC",
+      `SELECT * FROM np_blog ORDER BY date DESC LIMIT ${limit} OFFSET ${
+        page * limit
+      } `,
       (err, response) => {
         connection.release(); // return the connection to pool
         if (err) throw err;
         res.send(response);
+      }
+    );
+  });
+});
+app.get("/backend/count", (req, res) => {
+  const limit = 20;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT COUNT( *) as "countRows" FROM np_blog; `,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send({ data: Math.round(response[0]?.countRows / limit) });
       }
     );
   });
