@@ -22,11 +22,15 @@ app.get("/backend/test", (req, res) => {
   res.end();
 });
 
-app.get("/backend/news", (req, res) => {
+app.get("/backend/news/:page", (req, res) => {
+  const { page } = req.params;
+  const limit = 20;
   pool.getConnection((err, connection) => {
     if (err) throw err;
     connection.query(
-      "SELECT * FROM np_news ORDER BY date DESC",
+      `SELECT * FROM np_news ORDER BY date DESC LIMIT ${limit} OFFSET ${
+        page * limit
+      } `,
       (err, response) => {
         connection.release(); // return the connection to pool
         if (err) throw err;
@@ -58,6 +62,20 @@ app.get("/backend/count", (req, res) => {
     if (err) throw err;
     connection.query(
       `SELECT COUNT( *) as "countRows" FROM np_blog; `,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send({ data: Math.round(response[0]?.countRows / limit) });
+      }
+    );
+  });
+});
+app.get("/backend/ncount", (req, res) => {
+  const limit = 20;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT COUNT( *) as "countRows" FROM np_news; `,
       (err, response) => {
         connection.release(); // return the connection to pool
         if (err) throw err;
