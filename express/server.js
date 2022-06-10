@@ -22,23 +22,6 @@ app.get("/backend/test", (req, res) => {
   res.end();
 });
 
-app.get("/backend/news/:page", (req, res) => {
-  const { page } = req.params;
-  const limit = 20;
-  pool.getConnection((err, connection) => {
-    if (err) throw err;
-    connection.query(
-      `SELECT * FROM np_news ORDER BY date DESC LIMIT ${limit} OFFSET ${
-        page * limit
-      } `,
-      (err, response) => {
-        connection.release(); // return the connection to pool
-        if (err) throw err;
-        res.send(response);
-      }
-    );
-  });
-});
 app.get("/backend/blog/:page", (req, res) => {
   const { page } = req.params;
   const limit = 20;
@@ -70,6 +53,54 @@ app.get("/backend/count", (req, res) => {
     );
   });
 });
+app.get("/backend/search/:link", (req, res) => {
+  const { link } = req.params;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT * FROM np_blog where title LIKE '${link}%' ORDER BY date DESC LIMIT 100`,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send(response);
+      }
+    );
+  });
+});
+app.get("/backend/category/:link/:page", (req, res) => {
+  const { link, page } = req.params;
+  const limit = 20;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT * FROM np_blog where category LIKE '${link}%' ORDER BY date DESC LIMIT ${limit} OFFSET ${
+        page * limit
+      } `,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send(response);
+      }
+    );
+  });
+});
+
+app.get("/backend/cncount/:link", (req, res) => {
+  const { link } = req.params;
+  const limit = 20;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT COUNT( *) as "countRows" FROM np_blog where category LIKE '${link}%'`,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send({ data: Math.round(response[0]?.countRows / limit) });
+      }
+    );
+  });
+});
+
 app.get("/backend/ncount", (req, res) => {
   const limit = 20;
   pool.getConnection((err, connection) => {
@@ -99,7 +130,24 @@ app.get("/backend/post/:link", (req, res) => {
     );
   });
 });
-app.get("/backend/news/:link", (req, res) => {
+app.get("/backend/news/:page", (req, res) => {
+  const { page } = req.params;
+  const limit = 20;
+  pool.getConnection((err, connection) => {
+    if (err) throw err;
+    connection.query(
+      `SELECT * FROM np_news ORDER BY date DESC LIMIT ${limit} OFFSET ${
+        page * limit
+      } `,
+      (err, response) => {
+        connection.release(); // return the connection to pool
+        if (err) throw err;
+        res.send(response);
+      }
+    );
+  });
+});
+app.get("/backend/newspage/:link", (req, res) => {
   const { link } = req.params;
   console.log(link);
   pool.getConnection((err, connection) => {
